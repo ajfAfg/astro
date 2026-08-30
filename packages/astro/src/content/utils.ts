@@ -491,11 +491,11 @@ export function isDeferredModule(viteId: string): boolean {
 async function loadContentConfig({
 	fs,
 	settings,
-	environment,
+	getEnvironment,
 }: {
 	fs: typeof fsMod;
 	settings: AstroSettings;
-	environment: RunnableDevEnvironment;
+	getEnvironment: () => RunnableDevEnvironment;
 }): Promise<ContentConfig | undefined> {
 	const contentPaths = getContentPaths(
 		settings.config,
@@ -506,7 +506,7 @@ async function loadContentConfig({
 		return undefined;
 	}
 	const configPathname = fileURLToPath(contentPaths.config.url);
-	const unparsedConfig = await environment.runner.import(configPathname);
+	const unparsedConfig = await getEnvironment().runner.import(configPathname);
 
 	const config = contentConfigParser.safeParse(unparsedConfig);
 	if (config.success) {
@@ -630,7 +630,7 @@ export async function reloadContentConfigObserver({
 }: {
 	fs: typeof fsMod;
 	settings: AstroSettings;
-	environment: RunnableDevEnvironment;
+	getEnvironment: () => RunnableDevEnvironment;
 	observer?: ContentObservable;
 }) {
 	observer.set({ status: 'loading' });
