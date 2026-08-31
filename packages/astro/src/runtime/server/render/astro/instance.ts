@@ -1,4 +1,5 @@
 import type { SSRResult } from '../../../../types/public/internal.js';
+import { markHTMLString } from '../../escape.js';
 import { isPromise } from '../../util.js';
 import { renderChild } from '../any.js';
 import type { RenderDestination } from '../common.js';
@@ -86,6 +87,16 @@ export class AstroComponentInstance {
 
 	private renderImpl(destination: RenderDestination, returnValue: AstroFactoryReturnValue) {
 		if (isHeadAndContent(returnValue)) {
+			// Partial pages (including server island responses) never call
+			// renderAllHeadContent, so propagated head parts (styles, links,
+			// scripts collected from e.g. MDX Content components) would be
+			// silently dropped. Write them inline instead. On non-partial pages
+			// the head was already collected by bufferPropagatedHead and will be
+			// emitted via renderAllHeadContent, so duplicating it here is
+			// unnecessary. See #17870.
+			if (this.result.partial && returnValue.head) {
+				destination.write(markHTMLString(returnValue.head));
+			}
 			return returnValue.content.render(destination);
 		} else {
 			return renderChild(destination, returnValue);
