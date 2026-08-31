@@ -1,5 +1,18 @@
 # @astrojs/cloudflare
 
+## 14.3.0
+
+### Minor Changes
+
+- [#17795](https://github.com/withastro/astro/pull/17795) [`15e2deb`](https://github.com/withastro/astro/commit/15e2debc7e81d353410ff76a76c3bf75b7fb3070) Thanks [@matthewp](https://github.com/matthewp)! - Adds concurrent rendering support for `experimental.incrementalBuild`, including when using `@astrojs/cloudflare`
+
+  Incremental builds no longer disable caching when `build.concurrency` is greater than `1`. Projects that set `build.concurrency: 1` to keep the cache enabled can remove that workaround. Cloudflare builds also reduce serialization overhead for large prerendered pages.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @astrojs/underscore-redirects@1.0.4
+
 ## 14.2.6
 
 ### Patch Changes
