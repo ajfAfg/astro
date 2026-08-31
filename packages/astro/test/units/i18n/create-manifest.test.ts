@@ -113,6 +113,80 @@ describe('createI18nFallbackRoutes — multiple fallback locales', () => {
 	});
 });
 
+describe('createI18nFallbackRoutes — prefix-always, locale-like path segments (#17880)', () => {
+	it('does not corrupt path segments that start with the locale code', () => {
+		const enEnterprise = createRouteData({
+			route: '/en/enterprise',
+			pathname: '/en/enterprise',
+			type: 'page',
+		});
+		const routes = [enEnterprise];
+
+		createI18nFallbackRoutes(
+			routes,
+			makeI18n({
+				defaultLocale: 'en',
+				locales: ['en', 'es'],
+				routing: { prefixDefaultLocale: true },
+				fallback: { es: 'en' },
+			}),
+			BASE_CONFIG,
+		);
+
+		const fallback = enEnterprise.fallbackRoutes.find((r) => r.route === '/es/enterprise');
+		assert.ok(fallback, 'expected fallback route /es/enterprise, not /es/esterprise');
+		assert.equal(fallback.pathname, '/es/enterprise');
+	});
+
+	it('does not corrupt deeply nested paths containing the locale code', () => {
+		const enBlogEntry = createRouteData({
+			route: '/en/blog/entry',
+			pathname: '/en/blog/entry',
+			type: 'page',
+		});
+		const routes = [enBlogEntry];
+
+		createI18nFallbackRoutes(
+			routes,
+			makeI18n({
+				defaultLocale: 'en',
+				locales: ['en', 'es'],
+				routing: { prefixDefaultLocale: true },
+				fallback: { es: 'en' },
+			}),
+			BASE_CONFIG,
+		);
+
+		const fallback = enBlogEntry.fallbackRoutes.find((r) => r.route === '/es/blog/entry');
+		assert.ok(fallback, 'expected fallback route /es/blog/entry, not /es/blog/estry');
+		assert.equal(fallback.pathname, '/es/blog/entry');
+	});
+
+	it('handles fallback between non-default locales with locale-like segments', () => {
+		const esEstudio = createRouteData({
+			route: '/es/estudio',
+			pathname: '/es/estudio',
+			type: 'page',
+		});
+		const routes = [esEstudio];
+
+		createI18nFallbackRoutes(
+			routes,
+			makeI18n({
+				defaultLocale: 'en',
+				locales: ['en', 'es', 'fr'],
+				routing: { prefixDefaultLocale: true },
+				fallback: { fr: 'es' },
+			}),
+			BASE_CONFIG,
+		);
+
+		const fallback = esEstudio.fallbackRoutes.find((r) => r.route === '/fr/estudio');
+		assert.ok(fallback, 'expected fallback route /fr/estudio, not /fr/frtudio');
+		assert.equal(fallback.pathname, '/fr/estudio');
+	});
+});
+
 describe('createI18nFallbackRoutes — no fallback config', () => {
 	it('does not generate any fallback routes when fallback is not configured', () => {
 		const enStart = createRouteData({ route: '/start', pathname: '/start', type: 'page' });

@@ -1010,5 +1010,10 @@ function joinSegments(segments: RoutePart[][]): string {
 
 function replaceOrKeep(original: string, from: string, to: string): string {
 	if (original.startsWith(`/${to}/`) || original === `/${to}`) return original;
-	return original.replace(`/${from}/`, `/${to}/`).replace(`/${from}`, `/${to}`);
+	// Only replace the leading locale segment to avoid corrupting later segments
+	// that happen to contain the locale code (e.g. "/en/enterprise" → "/es/enterprise",
+	// not "/es/esterprise"). See #17880.
+	if (original.startsWith(`/${from}/`)) return `/${to}/${original.slice(`/${from}/`.length)}`;
+	if (original === `/${from}`) return `/${to}`;
+	return original;
 }
